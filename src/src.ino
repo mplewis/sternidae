@@ -13,7 +13,7 @@ typedef struct Destination {
 // Updated by onNewGps
 // Location
 Location currentLoc = {0};
-// Time in seconds
+// Time in milliseconds
 unsigned long currentTime = 0;
 unsigned long lastTime = 0;
 double deltaTime = 0;
@@ -21,7 +21,7 @@ double deltaTime = 0;
 double currentDist = 0;
 double lastDist = 0;
 double deltaDist = 0;
-// ETA in seconds. If negative, we're traveling away from currentDest
+// ETA in milliseconds. If negative, we're traveling away from currentDest
 double etaTime = 0;
 
 Destination dests[] = {
@@ -30,6 +30,7 @@ Destination dests[] = {
   {"Work", {44.989136, -93.250454}},
 };
 
+// Change currentDest to change the
 Location currentDest = dests[0].loc;
 
 double distance(Location from, Location to) {
@@ -60,7 +61,7 @@ unsigned long updateAt = 0;
 void loop() {
   if (millis() >= updateAt) {
     updateAt = millis() + 1000;
-    int ticks = (millis() / 1000) % 24;
+    int ticks = millis() / 1000 % 24;
     onNewGps(
       (double) cos(ticks * (2 * 3.14159 / 24)),
       (double) sin(ticks * (2 * 3.14159 / 24))
@@ -70,7 +71,7 @@ void loop() {
     Serial.println(currentLoc.lng, 6);
     Serial.println(currentDist);
     Serial.println(deltaDist);
-    Serial.println(etaTime);
+    Serial.println(etaTime / 1000);
     Serial.println();
   }
 }
