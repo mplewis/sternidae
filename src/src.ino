@@ -60,11 +60,11 @@ unsigned long updateAt = 0;
 
 void loop() {
   if (millis() >= updateAt) {
-    updateAt = millis() + 1000;
-    int ticks = millis() / 1000 % 24;
+    updateAt = millis() + 250;
+    int ticks = millis() / 250 % 96;
     onNewGps(
-      (double) cos(ticks * (2 * 3.14159 / 24)),
-      (double) sin(ticks * (2 * 3.14159 / 24))
+      (double) cos(ticks * (2 * 3.14159 / 96)),
+      (double) sin(ticks * (2 * 3.14159 / 96))
     );
     Serial.print(currentLoc.lat, 6);
     Serial.print(", ");
