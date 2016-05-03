@@ -127,12 +127,40 @@ unsigned long update_at = 0;
 // Start serial
 void setup() {
   Serial.begin(9600);
-
   lcd.begin();
   lcd.fillScreen(ILI9341_BLACK);
-  lcd.setTextColor(ILI9341_YELLOW);
-  lcd.setTextSize(2);
-  lcd.println("Hello world!");
+  lcd.setCursor(0, 0);
+  lcd.setTextSize(3);
+  lcd.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+  lcd.println("Lake Harriet");
+  lcd.setCursor(0, 296);
+  lcd.println("12:30   14.8V");
+  lcd.fillCircle(120, 172, 103, ILI9341_WHITE);
+  lcd.fillCircle(120, 172, 103 - 4, ILI9341_BLACK);
+}
+
+void draw() {
+  const int LINE_LEN = 14;
+  lcd.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+
+  // Arduino doesn't support snprintf with %f
+  char out[LINE_LEN];
+  double dist = min(current_dist, 999.9);
+  dtostrf(dist, 0, 1, out);
+  strlcat(out, "mi", LINE_LEN);
+  lcd.setCursor(0, 24);
+  lcd.print(out);
+
+  lcd.setCursor(8 * 18, 24);
+  if (eta_time >= 0) {
+    long secs = eta_time / 1000;
+    int hrs = secs / 60 / 60;
+    int mins = secs / 60 % 60;
+    snprintf(out, LINE_LEN, "%2d:%02d", hrs, mins);
+    lcd.print(out);
+  } else {
+    lcd.print(" -:--");
+  }
 }
 
 // Fake GPS data and print calculated values
@@ -150,5 +178,6 @@ void loop() {
     Serial.println(current_dist);
     Serial.println(current_bearing);
     Serial.println();
+    draw();
   }
 }
