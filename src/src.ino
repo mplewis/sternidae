@@ -19,6 +19,12 @@ Destination dests[] = {
   {"Work", {44.989136, -93.250454}},
 };
 
+// For calculating distance
+// Earth's radius, in mi
+const double EARTH_RADIUS = 3959;
+// Radians per degree
+const double RADS_PER_DEG = 2 * 3.14159 / 360;
+
 // Updated by on_new_gps
 // Location
 Location current_loc = {0};
@@ -41,9 +47,15 @@ int avg_buf_pos = 0;
 // Change current_dest to change the distance and eta
 Location current_dest = dests[0].loc;
 
-// Assumes flat world - error: ~1km @ 1000km
+// Uses Haversine formula
+// http://www.movable-type.co.uk/scripts/gis-faq-5.1.html
+// http://andrew.hedges.name/experiments/haversine/
 double distance(Location from, Location to) {
-  return sqrt(pow(from.lat - to.lat, 2) + pow(from.lng - to.lng, 2));
+  double dlat = (to.lat - from.lat) * RADS_PER_DEG;
+  double dlng = (to.lng - from.lng) * RADS_PER_DEG;
+  double a = pow(sin(dlat/2), 2) + cos(from.lat) * cos(to.lat) * pow(sin(dlng/2), 2);
+  double c = 2 * atan2(sqrt(a), sqrt(1-a));
+  return EARTH_RADIUS * c;
 }
 
 // Stores a value for the sliding window average
