@@ -1,4 +1,12 @@
+#include "ILI9341_t3.h"
+#include "SPI.h"
 #include <math.h>
+
+// Hardware
+// TFT LCD
+const int TFT_DC = 9;
+const int TFT_CS = 10;
+ILI9341_t3 lcd = ILI9341_t3(TFT_CS, TFT_DC);
 
 // A physical location
 typedef struct Location {
@@ -118,6 +126,12 @@ unsigned long update_at = 0;
 // Start serial
 void setup() {
   Serial.begin(9600);
+
+  lcd.begin();
+  lcd.fillScreen(ILI9341_BLACK);
+  lcd.setTextColor(ILI9341_YELLOW);
+  lcd.setTextSize(2);
+  lcd.println("Hello world!");
 }
 
 // Fake GPS data and print calculated values
