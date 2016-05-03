@@ -154,6 +154,7 @@ void draw() {
   lcd.setCursor(8 * 18, 24);
   if (eta_time >= 0) {
     long secs = eta_time / 1000;
+    secs = min(99*60*60 + 59*60, secs);  // max at 99:59
     int hrs = secs / 60 / 60;
     int mins = secs / 60 % 60;
     snprintf(out, LINE_LEN, "%2d:%02d", hrs, mins);
