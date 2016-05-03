@@ -116,8 +116,9 @@ void on_new_gps(double lat, double lng) {
 
   current_bearing = bearing(current_loc, current_dest);
 
-  eta_time = -delta_time * current_dist / delta_dist;
-  put_avg(eta_time / 1000);
+  double inst_eta = -delta_time * current_dist / delta_dist;
+  put_avg(inst_eta);
+  eta_time = get_avg();
 }
 
 // Used for simulating GPS data
