@@ -32,10 +32,12 @@ Location current_loc = {0};
 unsigned long current_time = 0;
 unsigned long last_time = 0;
 double delta_time = 0;
-// Distance in degrees
+// Distance in mi
 double current_dist = 0;
 double last_dist = 0;
 double delta_dist = 0;
+// Bearing in degrees
+double current_bearing = 0;
 // ETA in milliseconds. If negative, we're traveling away from current_dest
 double eta_time = 0;
 
@@ -56,6 +58,24 @@ double distance(Location from, Location to) {
   double a = pow(sin(dlat/2), 2) + cos(from.lat) * cos(to.lat) * pow(sin(dlng/2), 2);
   double c = 2 * atan2(sqrt(a), sqrt(1-a));
   return EARTH_RADIUS * c;
+}
+
+// http://www.movable-type.co.uk/scripts/latlong.html
+// http://forum.arduino.cc/index.php?topic=45760.0
+// returns bearing in degrees
+double bearing(Location from, Location to) {
+  double lat1 = from.lat * RADS_PER_DEG;
+  double lng1 = from.lng * RADS_PER_DEG;
+  double lat2 = to.lat * RADS_PER_DEG;
+  double lng2 = to.lng * RADS_PER_DEG;
+
+  double bearing = atan2(
+    sin(lng2-lng1) * cos(lat2),
+    (cos(lat1) * sin(lat2)) - (sin(lat1) * cos(lat2) * cos(lng2-lng1))
+  ) / RADS_PER_DEG;
+
+  // use mod to turn -90 = 270
+  return fmod((bearing + 360.0), 360);
 }
 
 // Stores a value for the sliding window average
@@ -86,6 +106,8 @@ void on_new_gps(double lat, double lng) {
   current_dist = distance(current_loc, current_dest);
   delta_dist = current_dist - last_dist;
 
+  current_bearing = bearing(current_loc, current_dest);
+
   eta_time = -delta_time * current_dist / delta_dist;
   put_avg(eta_time / 1000);
 }
@@ -111,8 +133,7 @@ void loop() {
     Serial.print(", ");
     Serial.println(current_loc.lng, 6);
     Serial.println(current_dist);
-    Serial.println(delta_dist);
-    Serial.println(get_avg());
+    Serial.println(current_bearing);
     Serial.println();
   }
 }
