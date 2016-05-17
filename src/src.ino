@@ -121,25 +121,7 @@ void on_new_gps(double lat, double lng) {
   eta_time = get_avg();
 }
 
-// Used for simulating GPS data
-unsigned long update_at = 0;
-
-// Start serial
-void setup() {
-  Serial.begin(9600);
-  lcd.begin();
-  lcd.fillScreen(ILI9341_BLACK);
-  lcd.setCursor(0, 0);
-  lcd.setTextSize(3);
-  lcd.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-  lcd.println("Lake Harriet");
-  lcd.setCursor(0, 296);
-  lcd.println("12:30   14.8V");
-  lcd.fillCircle(120, 172, 103, ILI9341_WHITE);
-  lcd.fillCircle(120, 172, 103 - 4, ILI9341_BLACK);
-}
-
-void draw() {
+void draw_dist_eta() {
   const int LINE_LEN = 14;
   lcd.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
 
@@ -162,6 +144,30 @@ void draw() {
   } else {
     lcd.print(" -:--");
   }
+}
+
+void draw() {
+  draw_dist_eta();
+  draw_lines();
+}
+
+// Used for simulating GPS data
+unsigned long update_at = 0;
+
+// Start serial
+void setup() {
+  Serial.begin(9600);
+  lcd.begin();
+  lcd.setRotation(2);
+  lcd.fillScreen(ILI9341_BLACK);
+  lcd.setCursor(0, 0);
+  lcd.setTextSize(3);
+  lcd.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+  lcd.println("Lake Harriet");
+  lcd.setCursor(0, 296);
+  lcd.println("12:30   14.8V");
+  lcd.fillCircle(120, 172, 103, ILI9341_WHITE);
+  lcd.fillCircle(120, 172, 103 - 4, ILI9341_BLACK);
 }
 
 // Fake GPS data and print calculated values
