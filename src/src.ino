@@ -131,7 +131,6 @@ void draw_dist_eta() {
 
 void draw() {
   draw_dist_eta();
-  draw_lines();
 }
 
 // Used for simulating GPS data
