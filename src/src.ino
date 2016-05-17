@@ -1,5 +1,6 @@
 #include "ILI9341_t3.h"
 #include "SPI.h"
+#include "Average.h"
 #include <math.h>
 
 // Hardware
@@ -48,11 +49,8 @@ double delta_dist = 0;
 double current_bearing = 0;
 // ETA in milliseconds. If negative, we're traveling away from current_dest
 double eta_time = 0;
-
-// For averaging ETA
-const int avg_count = 10;
-double avg_buf[avg_count] = {0};
-int avg_buf_pos = 0;
+// Averaged ETA in milliseconds
+Average<double> avg_eta_time(10);
 
 // Change current_dest to change the distance and eta
 Location current_dest = dests[0].loc;
@@ -86,21 +84,6 @@ double bearing(Location from, Location to) {
   return fmod((bearing + 360.0), 360);
 }
 
-// Stores a value for the sliding window average
-void put_avg(double val) {
-  avg_buf[avg_buf_pos] = val;
-  avg_buf_pos = (avg_buf_pos + 1) % avg_count;
-}
-
-// Gets the average of all stored values
-double get_avg() {
-  double avg = 0;
-  for (int i = 0; i < avg_count; i++) {
-    avg += avg_buf[i] / avg_count;
-  }
-  return avg;
-}
-
 // Called when the GPS has a new location
 void on_new_gps(double lat, double lng) {
   current_loc.lat = lat;
@@ -117,8 +100,8 @@ void on_new_gps(double lat, double lng) {
   current_bearing = bearing(current_loc, current_dest);
 
   double inst_eta = -delta_time * current_dist / delta_dist;
-  put_avg(inst_eta);
-  eta_time = get_avg();
+  avg_eta_time.push(inst_eta);
+  eta_time = avg_eta_time.mean();
 }
 
 void draw_dist_eta() {
