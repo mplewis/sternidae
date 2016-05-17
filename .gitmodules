@@ -4,3 +4,6 @@
 [submodule "lib/Average"]
 	path = lib/Average
 	url = git@github.com:MajenkoLibraries/Average.git
+[submodule "lib/FastLED"]
+	path = lib/FastLED
+	url = https://github.com/FastLED/FastLED
