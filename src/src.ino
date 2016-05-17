@@ -23,7 +23,7 @@ typedef struct Destination {
 
 // Waypoints to be used for navigation
 Destination dests[] = {
-  {"Test", {0.0, 10.0}},
+  {"Test", {0.0, 2.0}},
   {"Home", {45.022884, -93.244983}},
   {"Work", {44.989136, -93.250454}},
 };
@@ -32,7 +32,7 @@ Destination dests[] = {
 // Earth's radius, in mi
 const double EARTH_RADIUS = 3959;
 // Radians per degree
-const double RADS_PER_DEG = 2 * 3.14159 / 360;
+const double RADS_PER_DEG = 2 * PI / 360;
 
 // Updated by on_new_gps
 // Location
@@ -129,8 +129,61 @@ void draw_dist_eta() {
   }
 }
 
+/*
+Draw the BCEF rectangle as shown below:
+
+       e__d__f
+      /  /  /
+     /  /  /
+    /  /  /
+   /  /  /
+  b__a__c
+    /
+   /
+  /
+ / angle
+*________
+^
+^--- origin
+
+<CBE = <BEF = <EFC = <FCB = 90°
+start_len: origin -> a
+end_len: origin -> d
+
+angle is in degrees
+origin_x, origin_y, start_len, end_len, thickness are in pixels
+*/
+void draw_line(double origin_x, double origin_y, double angle,
+               double start_len, double end_len, double thickness,
+               uint16_t color) {
+  angle -= 90;  // align needle 90° left to N
+  angle = angle * RADS_PER_DEG;  // convert to radians
+  double a_x = cos(angle) * start_len + origin_x;
+  double a_y = sin(angle) * start_len + origin_y;
+  double d_x = cos(angle) * end_len + origin_x;
+  double d_y = sin(angle) * end_len + origin_y;
+  double ab_x = cos(angle + PI/2) * thickness / 2;
+  double ab_y = sin(angle + PI/2) * thickness / 2;
+  double b_x = a_x + ab_x;
+  double b_y = a_y + ab_y;
+  double c_x = a_x - ab_x;
+  double c_y = a_y - ab_y;
+  double e_x = d_x + ab_x;
+  double e_y = d_y + ab_y;
+  double f_x = d_x - ab_x;
+  double f_y = d_y - ab_y;
+  lcd.fillTriangle(b_x, b_y, c_x, c_y, e_x, e_y, color);
+  lcd.fillTriangle(c_x, c_y, e_x, e_y, f_x, f_y, color);
+}
+
+void draw_lines() {
+  lcd.fillCircle(120, 172, 103 - 4, ILI9341_BLACK);
+  draw_line(120, 172, current_bearing, 30, 95, 6, ILI9341_RED);
+}
+
 void draw() {
   draw_dist_eta();
+  draw_lines();
 }
 
 // Used for simulating GPS data
@@ -149,7 +202,6 @@ void setup() {
   lcd.setCursor(0, 296);
   lcd.println("12:30   14.8V");
   lcd.fillCircle(120, 172, 103, ILI9341_WHITE);
-  lcd.fillCircle(120, 172, 103 - 4, ILI9341_BLACK);
 }
 
 // Fake GPS data and print calculated values
@@ -158,8 +210,8 @@ void loop() {
     update_at = millis() + 250;
     int ticks = millis() / 250 % 96;
     on_new_gps(
-      (double) cos(ticks * (2 * 3.14159 / 96)),
-      (double) sin(ticks * (2 * 3.14159 / 96))
+      (double) cos(ticks * (2 * PI / 96)),
+      (double) sin(ticks * (2 * PI / 96))
     );
     Serial.print(current_loc.lat, 6);
     Serial.print(", ");
