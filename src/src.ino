@@ -213,12 +213,6 @@ void loop() {
       (double) cos(ticks * (2 * PI / 96)),
       (double) sin(ticks * (2 * PI / 96))
     );
-    Serial.print(current_loc.lat, 6);
-    Serial.print(", ");
-    Serial.println(current_loc.lng, 6);
-    Serial.println(current_dist);
-    Serial.println(current_bearing);
-    Serial.println();
     draw();
   }
 }
